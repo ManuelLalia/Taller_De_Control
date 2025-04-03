@@ -16,13 +16,12 @@ unsigned long endTime = 0;
 const int periodo = 1000;   // ms ->  1Hz
 
 void setup() {
-  // put your setup code here, to run once:
   myservo.attach(9);  // attaches the servo on pin 9 to the Servo object
   Serial.begin(115200);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  // Mido el tiempo que tardo en ejecutar todas las acciones
   startTime = micros();
 
   sensorValue = analogRead(sensorPin);
@@ -35,5 +34,6 @@ void loop() {
 
   endTime = micros();
 
+  // Calculo el delay para hacer una vuelta del programa con el período definido
   delay(periodo - (endTime-startTime)/1000.0);
 }
