@@ -23,13 +23,13 @@ void loop() {
 
   // Ejercicio 2: Se controla la posición del servo pasando un angulo entre 0° y 180°
 
-  myservo.write(0);
+  myservo.write(60);
   delay(2000);
   myservo.write(90);
   delay(2000);
-  myservo.write(180);
+  myservo.write(120);
   delay(2000);
-  myservo.write(90);
-  delay(2000);
+  // myservo.write(90);
+  // delay(2000);
 
 }
