@@ -54,32 +54,36 @@ void setup() {
 void loop() {
   startTime = micros();
 
-  static int angulo_servo = 0;
-  static int contador = 0;
-  if(contador == 0){
-    angulo_servo = 0;
-    myservo.write(angulo_servo + CORRECCION_SERVO);
-  }
+  static float error = 0;
+  static float error_ant = 0;
+  static float salida = 0;
+  static float salida_ant = 0;
+  static float angulo_servo = 0;
+  static float angulo_servo_ant = 0;
+
+  float ref = 0;
+
+  salida_ant = salida;
+  salida = medir_angulo();
   
-  if(contador==200){
-    angulo_servo = 30;
-    myservo.write(angulo_servo + CORRECCION_SERVO);
-  }
+  error_ant = error;
+  error = ref - salida;
 
-  contador++;
-  if(contador==400)
-    contador = 0;
+  angulo_servo_ant = angulo_servo;
+  
+  // Bilineal 1: 0.15136; 2: 0.085114
+  // angulo_servo = 0.085114 * (error + error_ant) + angulo_servo_ant;
+
+  // Forward
+  angulo_servo = 0.30271 * error_ant + angulo_servo_ant;
+
+  // Backwards
+  // angulo_servo = 0.30271 * error + angulo_servo_ant;
+
+  myservo.write(angulo_servo + CORRECCION_SERVO);
 
 
-  float medicion = medir_angulo();
-  float angulo = medicion + CORRECCION_IMU;
-
-
-  matlab_send(angulo, angulo_servo);
-  // theta_g = theta_(mejor) + g_x * delta_t (0.02)
-  // theta_a = f(a_z, a_y) atan2
-
-  // theta_(mejor) = alpha * theta_a + (1-alpha) * theta_g
+  // matlab_send(angulo, angulo_servo);
 
   endTime = micros();
   
@@ -100,7 +104,7 @@ float medir_angulo(){
   float theta_g_best = theta_best + (g.gyro.x * 0.02) * 180/PI;
   theta_best = ALPHA * theta_a + (1-ALPHA) * theta_g_best;
 
-  return theta_best;
+  return theta_best + CORRECCION_IMU;
 }
 
 void matlab_send(float dato1, float dato2){

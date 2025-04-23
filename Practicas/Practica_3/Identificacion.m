@@ -1,18 +1,14 @@
 close all
 
 t = out.tout;
-angulos = out.d4;
+angulos = out.IMU;
+entrada = out.Servo;
 
-
-entrada = zeros(length(angulos),1);
-for i=1:2:7
-    entrada(i*400+1:i*400+400) = 30 * ones(400,1);
-end
 
 figure()
 plot(t,entrada)
 hold on
-plot(t,angulos)
+stairs(t,angulos)
 
 % Y = [ Y-1 Y-2 X] * alpha
 
@@ -33,10 +29,14 @@ sys = tf([alpha(3) alpha(4)],[1 -alpha(1) -alpha(2)], 0.02);
 
 H = d2c(sys, 'tustin');
 
+[x1, t1] = step(30*sys, 10);
+[x2, t2] = step(30*H, 10);
+
 figure()
-step(30*sys, 10)
+stairs(t1, x1, 'color', 'blue', 'LineWidth', 1)
 hold on
-plot(t(1:400), angulos(401:800), 'color', 'red')
-% plot(t(1:400), angulos(1201:1600), 'color', 'red')
-xlim([0 1])
+plot(t2, x2, 'color', 'black', 'LineWidth', 1.2)
+stairs(t(1:200), angulos(601:800), 'color', 'red', 'LineWidth', 1)
+axis([0 1.5 -0.5 12])
+legend('Discreto', 'Continuo', 'Datos', 'Location', 'Southeast')
 
