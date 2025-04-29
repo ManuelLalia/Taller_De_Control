@@ -13,6 +13,9 @@ unsigned long IMUEndTime = 0;
 unsigned long AngleStartTime = 0;
 unsigned long AngleEndTime = 0;
 
+unsigned long FloatStartTime = 0;
+unsigned long FloatEndTime = 0;
+
 Servo myservo;  // create Servo object to control a servo
 
 #define PI 3.14159
@@ -59,20 +62,47 @@ void loop() {
   startTime = micros();
 
   int angulo_servo = 0;
-  myservo.write(angulo_servo + CORRECCION_SERVO);
+  // myservo.write(angulo_servo + CORRECCION_SERVO);
+  // myservo.writeMicroseconds(1500);
   
   AngleStartTime = micros();
   float medicion = medir_angulo();
   AngleEndTime = micros();
   
   float TiempoAngle = AngleEndTime - AngleStartTime;
-  Serial.print("Tiempo ángulo: ");
-  Serial.print(TiempoAngle);
-  Serial.println(" us");
+  // Serial.print("Tiempo ángulo: ");
+  // Serial.print(TiempoAngle);
+  // Serial.println(" us");
   float angulo = medicion + CORRECCION_IMU;
 
+  static float aux = 0;
+  static float contador = 0.0;
+  if (contador < 100.0) {
+    aux += TiempoAngle;
+    contador++;
+  }
 
-  matlab_send(angulo, angulo_servo);
+  else if (contador < 200.0) {
+    float promedio = aux / contador;
+    // Serial.print("Promedio = ");
+    // Serial.print(promedio);
+    // Serial.println(" us");
+  }
+
+  static float tiempo = 0;
+
+  FloatStartTime = micros();
+  for(int i=0; i<100; i++){
+    // matlab_send(angulo);
+    Serial.print(angulo);
+  }
+  FloatEndTime = micros();
+
+  // matlab_send(FloatEndTime - FloatStartTime);
+
+  Serial.print("\nTiempo float = ");
+  Serial.println( FloatEndTime - FloatStartTime);
+
   // theta_g = theta_(mejor) + g_x * delta_t (0.02)
   // theta_a = f(a_z, a_y) atan2
 
@@ -91,9 +121,9 @@ float medir_angulo(){
   IMUEndTime = micros();
   
   float TiempoIMU = IMUEndTime - IMUStartTime;
-  Serial.print("Tiempo IMU: ");
-  Serial.print(TiempoIMU);
-  Serial.println(" us");
+  // Serial.print("Tiempo IMU: ");
+  // Serial.print(TiempoIMU);
+  // Serial.println(" us");
 
   float theta_a = ( atan2(a.acceleration.y, a.acceleration.z) ) * 180/PI;
 
@@ -104,12 +134,12 @@ float medir_angulo(){
   return theta_best;
 }
 
-void matlab_send(float dato1, float dato2){
+void matlab_send(float dato1){
   // Encabezado que marca el comienzo de los datos
   Serial.write("abcd");
 
   byte * b = (byte *) &dato1;
   Serial.write(b,4);
-  b = (byte *) &dato2;
-  Serial.write(b,4);
+  // b = (byte *) &dato2;
+  // Serial.write(b,4);
 }

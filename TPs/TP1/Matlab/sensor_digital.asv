@@ -18,8 +18,7 @@ histogram(distancia, 6, 'Normalization', 'pdf'); % 20 bins, normalizado como den
 hold on;
 
 % Superponemos la campana de Gauss teórica
-x_values = linspace(min(distancia), max(distancia), 1000);
-% x_values = linspace(14, 18, 100);
+x_values = linspace(min(distancia), max(distancia), 100);
 gauss_fit = normpdf(x_values, media_dist, sqrt(var_dist));
 plot(x_values, gauss_fit, 'r-', 'LineWidth', 2);
 

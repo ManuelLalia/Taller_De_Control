@@ -49,12 +49,12 @@ void loop() {
   
   static float aux = 0;
   static float contador = 0.0;
-  if (contador < 500.0) {
+  if (contador < 1000.0) {
     aux += TiempoSensor;
     contador++;
   }
 
-  if (contador == 500.0) {
+  if (contador == 1000.0) {
     float promedio = aux / contador;
     Serial.print("Promedio = ");
     Serial.print(promedio);
