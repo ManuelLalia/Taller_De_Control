@@ -12,9 +12,9 @@ unsigned long endTime = 0;
 Servo myservo;  // create Servo object to control a servo
 
 #define PI 3.14159
-#define ALPHA 0.08
+#define ALPHA 0.1
 #define CORRECCION_SERVO 85
-#define CORRECCION_IMU 2.2
+#define CORRECCION_IMU -0.2128
 
 void setup() {
   Serial.begin(115200);
@@ -71,9 +71,8 @@ void loop() {
     contador = 0;
 
 
-  float medicion = medir_angulo();
-  float angulo = medicion + CORRECCION_IMU;
-
+  float angulo = medir_angulo();
+  
 
   matlab_send(angulo, angulo_servo);
   // theta_g = theta_(mejor) + g_x * delta_t (0.02)
@@ -91,16 +90,16 @@ float medir_angulo(){
   mpu.getEvent(&a, &g, &temp);  // Leo los sensores. ¡¡ El valor de la velocidad angular está en radianes por segundo !!
 
   static float theta_g = 0;
-  theta_g = theta_g + (g.gyro.x * 0.02) * 180/PI;
+  theta_g = theta_g + ((g.gyro.x + 0.1138) * 0.02) * 180/PI;
 
-  float theta_a = ( atan2(a.acceleration.y, a.acceleration.z) ) * 180/PI;
+  float theta_a = ( atan2(a.acceleration.y + 0.1840, a.acceleration.z - 2.1528) ) * 180/PI;
 
 
   static float theta_best = 0;
-  float theta_g_best = theta_best + (g.gyro.x * 0.02) * 180/PI;
+  float theta_g_best = theta_best + ((g.gyro.x + 0.1138) * 0.02) * 180/PI;
   theta_best = ALPHA * theta_a + (1-ALPHA) * theta_g_best;
 
-  return theta_best;
+  return theta_best + CORRECCION_IMU;
 }
 
 void matlab_send(float dato1, float dato2){

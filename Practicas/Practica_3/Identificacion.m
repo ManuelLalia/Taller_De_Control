@@ -1,14 +1,15 @@
 close all
 
-t = out.tout;
-angulos = out.IMU;
-entrada = out.Servo;
+t = out.tout(200:end);
+angulos = out.angulo_imu(200:end);
+entrada = out.angulo_servo(200:end);
 
 
 figure()
 plot(t,entrada)
 hold on
 stairs(t,angulos)
+
 
 % Y = [ Y-1 Y-2 X] * alpha
 
@@ -36,7 +37,7 @@ figure()
 stairs(t1, x1, 'color', 'blue', 'LineWidth', 1)
 hold on
 plot(t2, x2, 'color', 'black', 'LineWidth', 1.2)
-stairs(t(1:200), angulos(601:800), 'color', 'red', 'LineWidth', 1)
-axis([0 1.5 -0.5 12])
+stairs(t(1:200)-3.98, angulos(1201:1400), 'color', 'red', 'LineWidth', 1)
+axis([0 1.5 -0.5 14])
 legend('Discreto', 'Continuo', 'Datos', 'Location', 'Southeast')
 

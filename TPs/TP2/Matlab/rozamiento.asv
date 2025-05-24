@@ -1,0 +1,58 @@
+close all
+
+distancia = out.distancia / 100; % Paso de cm a m
+d_max = 0.340; % Con el carro en la punta (lo saco de los primeros 20 segs de mediciones)
+
+% Ploteo todo para sacar los intervalos de muestras de las mediciones
+% figure(); hold on
+% stairs(distancia)
+% yline(d_max)
+
+load('med1.mat')
+% Estas son para med1
+d1 = distancia(1576:1636);
+d2 = distancia(2312:2375);
+d3 = distancia(3097:3159);
+d4 = distancia(4038:4090);
+d5 = distancia(4747:4803);
+d6 = distancia(6861:6921);
+
+load('med2.mat')
+% Estas son para med2
+d7 = distancia(1456:1509);
+d8 = distancia(3587:3653);
+d9 = distancia(4428:4486);
+d10 = distancia(4962:5021);
+d11 = distancia(6389:6437); % Me salte una xq estaba fea
+d12 = distancia(7004:7070);
+
+exp = {d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12};
+
+angulo = deg2rad(mean(out.angulo(500:1000)));
+k = double(9.81 * sin(angulo));
+
+ft = fittype('a^2 * k * (exp(-t/a) - 1) + a * k * t + c', 'problem', {'k', 'c'}, 'independent', {'t'});
+
+t = cell(1,12);
+f = cell(1,12);
+
+for i = 1:size(exp,2)
+    t{i} = linspace(0, length(exp{i})*0.02, length(exp{i}));
+    c = double( exp{i}(1) );
+    fi = fit(t{i}', exp{i}, ft, 'problem', {k, c});
+    f{i} = fi;
+end
+
+m_b = [f{1}.a f{2}.a f{3}.a f{4}.a f{5}.a f{6}.a];
+
+figure();
+for i=1:6
+   subplot(2,3,i);hold on
+   plot(f{i}, t{i}, exp{i})
+   legend('off')
+   title(['m/b = ', num2str(f{i}.a)])
+end
+suptitle(['m/b promedio = ', num2str(mean(m_b))])
+
+
+
