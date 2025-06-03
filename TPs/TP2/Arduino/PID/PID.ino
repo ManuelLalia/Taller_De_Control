@@ -22,7 +22,8 @@ Servo myservo;  // create Servo object to control a servo
 #define ALPHA 0.1
 #define CORRECCION_SERVO 85
 #define CORRECCION_IMU -0.2128
-#define PUNTO_0_BARRA 0
+
+#define Ts 0.02
 
 void setup() {
   Serial.begin(115200);
@@ -54,7 +55,7 @@ void setup() {
   mpu.setGyroRange(MPU6050_RANGE_500_DEG);
   mpu.setFilterBandwidth(MPU6050_BAND_44_HZ);
 
-  // myservo.write(0 + CORRECCION_SERVO);
+  myservo.write(0 + CORRECCION_SERVO);
 
   delay(100);
 }
@@ -62,18 +63,80 @@ void setup() {
 void loop() {
   startTime = micros();
 
-  comandarServo(10);
-  float distancia = medir_distancia();
-  float angulo = medir_angulo();
+  static float error = 0;
+  static float error_ant = 0;
+  static float salida = 0;
+  // static float salida_ant = 0;
+  static float angulo_servo = 0;
+  // static float angulo_servo_ant = 0;
 
-  matlab_send(distancia, angulo);
+  float ref = 16;
+  static int contador = 0;
+ 
+  // if(contador > 2000){
+  //   ref = 16;
+  //   contador = 0;
+  // }else if(contador > 1000){
+  //     ref = 26;
+  // }
+  contador++;
+
+
+  salida = medir_distancia();
+  error = ref - salida;
+  if(abs(error) < 0.4){
+    error = 0;
+  }
+
+  static float Kp = 1.8; // 3
+  static float Kd = 0;
+  static float Ki = 0; //0.75
+
+  static float Ik_ant = 0; 
+  float Ik = Ik_ant + Ts/2 * (error + error_ant);
+
+  static float Dk_ant = 0;
+  static float Dk = 0;
+  if(contador > 100){ 
+    Dk = 2 * (error - error_ant)/Ts - Dk_ant;
+  }
+  // Serial.println(Dk);
+  // delay(10000);
+  // if(Dk > 10)
+  //   Dk = 10;
+  // else if(Dk < -10)
+  //   Dk = -10;
+
+  angulo_servo = Kp * error + Ki * Ik + Kd * Dk;
+  comandarServo(angulo_servo);
+
+  error_ant = error;
+  Ik_ant = Ik;
+  Dk_ant = Dk;
+
+  matlab_send(ref - 16, error, angulo_servo, salida - 16, Dk);
+  // matlab_send(Ik, Dk, error);
+  // Serial.println(error);
 
   endTime = micros();
   
   delay(20 - (endTime-startTime)/1000.0);
 }
 
+float medir_distancia(){
+  return sonar.ping()/(2*29.287);
+}
 
+void comandarServo(float angulo){
+  if(angulo < -30){
+    angulo = -30;
+  } else if (angulo > 30){
+    angulo = 30;
+  }
+  
+  myservo.write(angulo + CORRECCION_SERVO);
+  return;
+}
 
 float medir_angulo(){
   sensors_event_t a, g, temp;   // Defino las variables para leer los sensores
@@ -92,27 +155,19 @@ float medir_angulo(){
   return theta_best + CORRECCION_IMU;
 }
 
-float medir_distancia(){
-  return sonar.ping()/(2*29.287) - PUNTO_0_BARRA;
-}
-
-void comandarServo(float angulo){
-  if(angulo < -30){
-    angulo = -30;
-  } else if (angulo > 30){
-    angulo = 30;
-  }
-  
-  myservo.write(angulo + CORRECCION_SERVO);
-  return;
-}
-
-void matlab_send(float dato1, float dato2){
+void matlab_send(float dato1, float dato2, float dato3, float dato4, float dato5)
+{
   // Encabezado que marca el comienzo de los datos
   Serial.write("abcd");
 
   byte * b = (byte *) &dato1;
   Serial.write(b,4);
   b = (byte *) &dato2;
+  Serial.write(b,4);
+  b = (byte *) &dato3;
+  Serial.write(b,4);
+  b = (byte *) &dato4;
+  Serial.write(b,4);
+  b = (byte *) &dato5;
   Serial.write(b,4);
 }
