@@ -54,11 +54,9 @@ void setup() {
 void loop() {
   startTime = micros();
 
-  float u = cuadrada(0, 30);
-
-  // float A [2][2] = { {1 ,0.02}, {-2.882, 0.6546} } ;
-  // float L[2] = {0.8698, 0.8867};
-  // float B[2] = {0, 1.236} ;
+  float ref = cuadrada(0, 10);
+  static float u = 0;
+  static float u_ant = 0;
 
   float A [3][3] = { {1 ,0.02, 0}, {-2.882, 0.6546, 0}, {0, 0, 1} };
   float L[3][2] = { {0.5834, 0.0033}, {-2.8476, -0.1451}, {-0.2459, 0.9315} };
@@ -74,8 +72,13 @@ void loop() {
   static float angulo_est_ant = 0; 
   static float velocidad_est_ant = 0;
 
-  // float angulo_est = A[0][0] * angulo_est_ant + A[0][1] * velocidad_est_ant + L[0] * (angulo - angulo_est_ant) + B[0] * u;
-  // float velocidad_est = A[1][0] * angulo_est_ant + A[1][1] * velocidad_est_ant + L[1] * (angulo - angulo_est_ant) + B[1] * u;
+  float K[2] = {-1.7136, -0.2869};
+  float F = 4.0453;
+  
+  u = F * ref + K[0] * angulo_est_ant + K[1] * velocidad_est_ant;
+
+  // Serial.println(u);
+  comandarServo(u);
 
   static float bias_est_ant = 0;
   float angulo_est = A[0][0] * angulo_est_ant + A[0][1] * velocidad_est_ant + A[0][2] * bias_est_ant + L[0][0] * (angulo - angulo_est_ant) + L[0][1] * (velocidad - velocidad_est_ant - bias_est_ant) + B[0] * u;
@@ -86,8 +89,9 @@ void loop() {
   velocidad_est_ant = velocidad_est;
   bias_est_ant = bias_est;
 
-  // matlab_send(u, angulo, velocidad, angulo_est, velocidad_est);
-  matlab_send(u, angulo, velocidad-bias_est, angulo_est, velocidad_est);
+
+  matlab_send(ref, angulo, velocidad, angulo_est, velocidad_est);
+  // matlab_send(u, 0., velocidad-bias_est, bias_est, velocidad_est);
   // theta_g = theta_(mejor) + g_x * delta_t (0.02)
   // theta_a = f(a_z, a_y) atan2
 
@@ -134,6 +138,17 @@ void medir_angulo(float *med){
 
   med[0] = theta_best;
   med[1] = (g.gyro.x + 0.1138) * 180/PI; // Bias = 0.1138
+}
+
+void comandarServo(float angulo){
+  if(angulo < -30){
+    angulo = -30;
+  } else if (angulo > 30){
+    angulo = 30;
+  }
+  
+  myservo.write(angulo + CORRECCION_SERVO);
+  return;
 }
 
 void matlab_send(float dato1, float dato2, float dato3, float dato4, float dato5){
