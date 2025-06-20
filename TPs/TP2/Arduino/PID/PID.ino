@@ -90,7 +90,7 @@ void loop() {
 
   static float Kp = 1.8; // 3
   static float Kd = 0;
-  static float Ki = 0; //0.75
+  static float Ki = 0.2; //0.75
 
   static float Ik_ant = 0; 
   float Ik = Ik_ant + Ts/2 * (error + error_ant);
@@ -114,7 +114,7 @@ void loop() {
   Ik_ant = Ik;
   Dk_ant = Dk;
 
-  matlab_send(ref - 16, error, angulo_servo, salida - 16, Dk);
+  matlab_send(angulo_servo, salida - 16, error, Ik, Dk);
   // matlab_send(Ik, Dk, error);
   // Serial.println(error);
 

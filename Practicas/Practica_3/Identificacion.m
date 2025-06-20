@@ -1,14 +1,14 @@
 close all
 
 t = out.tout(200:end);
-angulos = out.angulo_imu(200:end);
-entrada = out.angulo_servo(200:end);
+angulos = out.IMU(200:end);
+entrada = out.Servo(200:end);
 
 
-figure()
-plot(t,entrada)
-hold on
-stairs(t,angulos)
+% figure()
+% plot(t,entrada)
+% hold on
+% stairs(t,angulos)
 
 
 % Y = [ Y-1 Y-2 X] * alpha

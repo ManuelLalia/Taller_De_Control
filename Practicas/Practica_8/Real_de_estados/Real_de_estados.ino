@@ -90,7 +90,7 @@ void loop() {
   bias_est_ant = bias_est;
 
 
-  matlab_send(ref, angulo, velocidad, angulo_est, velocidad_est);
+  matlab_send(ref, angulo, velocidad-bias_est, angulo_est, velocidad_est);
   // matlab_send(u, 0., velocidad-bias_est, bias_est, velocidad_est);
   // theta_g = theta_(mejor) + g_x * delta_t (0.02)
   // theta_a = f(a_z, a_y) atan2
@@ -110,13 +110,13 @@ float cuadrada(float inicial, float final){
     myservo.write(angulo_servo + CORRECCION_SERVO);
   }
   
-  if(contador==200){
+  if(contador==300){
     angulo_servo = final;
     myservo.write(angulo_servo + CORRECCION_SERVO);
   }
 
   contador++;
-  if(contador==400)
+  if(contador==600)
     contador = 0;
   
   return angulo_servo;

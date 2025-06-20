@@ -99,8 +99,8 @@ void loop() {
   Ik_ant = Ik;
   Dk_ant = Dk;
 
-  // matlab_send(angulo_servo, salida, error, Ik, Dk);
-  matlab_send(Ik, Dk, error);
+  matlab_send(angulo_servo, salida, error, Ik, Dk);
+  // matlab_send(Ik, Dk, error);
   // Serial.println(error);
 
   endTime = micros();
@@ -140,7 +140,7 @@ float medir_angulo(){
   return theta_best + CORRECCION_IMU;
 }
 
-void matlab_send(float dato1, float dato2, float dato3)//, float dato4, float dato5)
+void matlab_send(float dato1, float dato2, float dato3, float dato4, float dato5)
 {
   // Encabezado que marca el comienzo de los datos
   Serial.write("abcd");
@@ -151,8 +151,8 @@ void matlab_send(float dato1, float dato2, float dato3)//, float dato4, float da
   Serial.write(b,4);
   b = (byte *) &dato3;
   Serial.write(b,4);
-  // b = (byte *) &dato4;
-  // Serial.write(b,4);
-  // b = (byte *) &dato5;
-  // Serial.write(b,4);
+  b = (byte *) &dato4;
+  Serial.write(b,4);
+  b = (byte *) &dato5;
+  Serial.write(b,4);
 }

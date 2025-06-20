@@ -10,7 +10,7 @@ d_max = 0.332; % Con el carro en la punta (lo saco de los primeros 20 segs de me
 %%
 
 load('med5.mat')
-distancia = out.distancia / 100; % Paso de cm a m
+distancia = out.distancia; % Paso de cm a m
 % Estas son para med1
 d1 = distancia(1258:1321);
 d2 = distancia(2101:2168);
@@ -63,7 +63,7 @@ d12 = distancia(8224:8291);
 exp = {d1, d3, d5, d9, d11, d12};
 
 angulo = deg2rad(mean(out.angulo(500:1000)));
-k = double(9.81 * sin(angulo));
+k = double(981 * sin(angulo));
 
 ft = fittype('a^2 * k * (exp(-t/a) - 1) + a * k * t + c', 'problem', {'k', 'c'}, 'independent', {'t'});
 
@@ -85,7 +85,7 @@ for i=1:size(exp,2)
    subplot(2,3,i);hold on
 %    subplot(3,4,i);hold on
    plot(f{i}, t{i}, exp{i})
-   axis([0 1.4 0 0.35])
+%    axis([0 1.4 0 0.35])
    grid()
    legend('Datos', 'Modelo exp', 'Location', 'NorthWest')
    xlabel('t [s]')

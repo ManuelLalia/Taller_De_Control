@@ -56,13 +56,13 @@ void loop() {
 
   float u = cuadrada(0, 30);
 
-  // float A [2][2] = { {1 ,0.02}, {-2.882, 0.6546} } ;
-  // float L[2] = {0.8698, 0.8867};
-  // float B[2] = {0, 1.236} ;
+  float A [2][2] = { {1 ,0.02}, {-2.882, 0.6546} } ;
+  float L[2] = {0.8698, 0.8867};
+  float B[2] = {0, 1.236} ;
 
-  float A [3][3] = { {1 ,0.02, 0}, {-2.882, 0.6546, 0}, {0, 0, 1} };
-  float L[3][2] = { {0.5834, 0.0033}, {-2.8476, -0.1451}, {-0.2459, 0.9315} };
-  float B[3] = {0, 1.236, 0} ;
+  // float A [3][3] = { {1 ,0.02, 0}, {-2.882, 0.6546, 0}, {0, 0, 1} };
+  // float L[3][2] = { {0.5834, 0.0033}, {-2.8476, -0.1451}, {-0.2459, 0.9315} };
+  // float B[3] = {0, 1.236, 0} ;
 
   
   float medicion[2] = {0, 0};
@@ -74,20 +74,20 @@ void loop() {
   static float angulo_est_ant = 0; 
   static float velocidad_est_ant = 0;
 
-  // float angulo_est = A[0][0] * angulo_est_ant + A[0][1] * velocidad_est_ant + L[0] * (angulo - angulo_est_ant) + B[0] * u;
-  // float velocidad_est = A[1][0] * angulo_est_ant + A[1][1] * velocidad_est_ant + L[1] * (angulo - angulo_est_ant) + B[1] * u;
+  float angulo_est = A[0][0] * angulo_est_ant + A[0][1] * velocidad_est_ant + L[0] * (angulo - angulo_est_ant) + B[0] * u;
+  float velocidad_est = A[1][0] * angulo_est_ant + A[1][1] * velocidad_est_ant + L[1] * (angulo - angulo_est_ant) + B[1] * u;
 
-  static float bias_est_ant = 0;
-  float angulo_est = A[0][0] * angulo_est_ant + A[0][1] * velocidad_est_ant + A[0][2] * bias_est_ant + L[0][0] * (angulo - angulo_est_ant) + L[0][1] * (velocidad - velocidad_est_ant - bias_est_ant) + B[0] * u;
-  float velocidad_est = A[1][0] * angulo_est_ant + A[1][1] * velocidad_est_ant + A[1][2] * bias_est_ant + L[1][0] * (angulo - angulo_est_ant) + L[1][1] * (velocidad - velocidad_est_ant - bias_est_ant) + B[1] * u;
-  float bias_est = A[2][0] * angulo_est_ant + A[2][1] * velocidad_est_ant + A[2][2] * bias_est_ant + L[2][0] * (angulo - angulo_est_ant) + L[2][1] * (velocidad - velocidad_est_ant - bias_est_ant) + B[2] * u;
+  // static float bias_est_ant = 0;
+  // float angulo_est = A[0][0] * angulo_est_ant + A[0][1] * velocidad_est_ant + A[0][2] * bias_est_ant + L[0][0] * (angulo - angulo_est_ant) + L[0][1] * (velocidad - velocidad_est_ant - bias_est_ant) + B[0] * u;
+  // float velocidad_est = A[1][0] * angulo_est_ant + A[1][1] * velocidad_est_ant + A[1][2] * bias_est_ant + L[1][0] * (angulo - angulo_est_ant) + L[1][1] * (velocidad - velocidad_est_ant - bias_est_ant) + B[1] * u;
+  // float bias_est = A[2][0] * angulo_est_ant + A[2][1] * velocidad_est_ant + A[2][2] * bias_est_ant + L[2][0] * (angulo - angulo_est_ant) + L[2][1] * (velocidad - velocidad_est_ant - bias_est_ant) + B[2] * u;
 
   angulo_est_ant = angulo_est;
   velocidad_est_ant = velocidad_est;
-  bias_est_ant = bias_est;
+  // bias_est_ant = bias_est;
 
-  // matlab_send(u, angulo, velocidad, angulo_est, velocidad_est);
-  matlab_send(u, angulo, velocidad-bias_est, angulo_est, velocidad_est);
+  matlab_send(u, angulo, velocidad, angulo_est, velocidad_est);
+  // matlab_send(bias_est, angulo, velocidad-bias_est, angulo_est, velocidad_est);
   // theta_g = theta_(mejor) + g_x * delta_t (0.02)
   // theta_a = f(a_z, a_y) atan2
 
@@ -106,13 +106,13 @@ float cuadrada(float inicial, float final){
     myservo.write(angulo_servo + CORRECCION_SERVO);
   }
   
-  if(contador==200){
+  if(contador==25){
     angulo_servo = final;
     myservo.write(angulo_servo + CORRECCION_SERVO);
   }
 
   contador++;
-  if(contador==400)
+  if(contador==50)
     contador = 0;
   
   return angulo_servo;
