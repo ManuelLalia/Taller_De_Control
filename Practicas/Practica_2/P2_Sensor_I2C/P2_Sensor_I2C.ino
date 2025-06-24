@@ -3,6 +3,10 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 
+#include <Servo.h>
+Servo myservo;
+#define CORRECCION_SERVO 88
+
 Adafruit_MPU6050 mpu; // Se define el objeto de la IMU
 
 // Variables para medir tiempo
@@ -11,6 +15,7 @@ unsigned long endTime = 0;
 
 void setup() {
   // Setup copiado del ejemplo de uso de la libreria
+  myservo.attach(9);
 
   // Se inicia el serial y se espera a que este listo
   Serial.begin(115200);
@@ -95,19 +100,24 @@ void setup() {
     break;
   }
 
+  myservo.write(20 + CORRECCION_SERVO);
   // Serial.println("");
-  delay(100);
+  delay(1000);
+  myservo.write(0 + CORRECCION_SERVO);
 }
 
 void loop() {
   // Mido el tiempo que tardo en ejecutar todas las instrucciones
   startTime = micros();
 
+  myservo.write(0 + CORRECCION_SERVO);
+
   sensors_event_t a, g, temp;   // Defino las variables para leer los sensores
   mpu.getEvent(&a, &g, &temp);  // Leo los sensores. ¡¡ El valor de la velocidad angular está en radianes por segundo !!
   
   // Envío los valores medidos a simulink
-  matlab_send(a.acceleration.x, a.acceleration.y, a.acceleration.z, g.gyro.x, g.gyro.y, g.gyro.z);
+  //                                            -0.11             *0.8216
+  matlab_send(a.acceleration.x, (a.acceleration.y - 0.11)*0.9944, (a.acceleration.z - 1.375)*0.9284, g.gyro.x+0.115, g.gyro.y, g.gyro.z);
   endTime = micros();
   
   delay(20 - (endTime-startTime)/1000.0);
