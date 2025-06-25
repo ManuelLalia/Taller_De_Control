@@ -109,10 +109,10 @@ void loop() {
   static float w_est_ant = 0;
 
   // Realimentación de estados
-  // float K[4] = { -3.9530, -1.0319, -1.3857, -0.0567 };
-  // float u = K[0] * pos_est_ant + K[1] * vel_est_ant + K[2] * ang_est_ant + K[3] * w_est_ant;
-  // u = limitar_u(u);
-  // comandarServo(u);
+  float K[4] = {-1.3077, -0.4431, -0.1525, -0.0001};
+  float u = K[0] * pos_est_ant + K[1] * vel_est_ant + K[2] * ang_est_ant + K[3] * w_est_ant;
+  u = limitar_u(u);
+  comandarServo(u);
 
   // Seguimiento de referencias
   // static float ref[2] = {0., 0.};
@@ -124,20 +124,20 @@ void loop() {
   // comandarServo(u);
 
   // Acción integral
-  static float ref = 0;
-  ref = cuadrada(-10, 10, 400, 800);
+  // static float ref = 0;
+  // // ref = cuadrada(-10, 10, 400, 800);
 
-  static float q_ant = 0;
-  float e = ref - pos;
-  float q = q_ant + 0.02 * e;
+  // static float q_ant = 0;
+  // float e = ref - pos;
+  // float q = q_ant + 0.02 * e;
 
 
 
-  float K[4] = {-4.1703, -0.8456, -1.5013, -0.1695};
-  float H = 4.8793;
-  float u = K[0] * pos_est_ant + K[1] * vel_est_ant + K[2] * ang_est_ant + K[3] * w_est_ant + H * q;
-  u = limitar_u(u);
-  comandarServo(u);
+  // float K[4] = { -5.6067, -1.1095, -2.2399, -0.2019 };
+  // float H = 6.9466;
+  // float u = K[0] * pos_est_ant + K[1] * vel_est_ant + K[2] * ang_est_ant + K[3] * w_est_ant + H * q;
+  // u = limitar_u(u);
+  // comandarServo(u);
 
   float pos_est = A[0][0] * pos_est_ant + A[0][1] * vel_est_ant + A[0][2] * ang_est_ant + A[0][3] * w_est_ant + L[0][0] * (pos - pos_est_ant) + L[0][1] * (ang - ang_est_ant) + B[0] * u;
   float vel_est = A[1][0] * pos_est_ant + A[1][1] * vel_est_ant + A[1][2] * ang_est_ant + A[1][3] * w_est_ant + L[1][0] * (pos - pos_est_ant) + L[1][1] * (ang - ang_est_ant) + B[1] * u;
@@ -148,18 +148,22 @@ void loop() {
   vel_est_ant = vel_est;
   ang_est_ant = ang_est;
   w_est_ant = w_est;
-  q_ant = q;
+  // q_ant = q;
   // Serial.println(ang);
   // Serial.println(u);
 
 
-  // matlab_send(0, pos, pos_est, vel, vel_est, ang, ang_est, w, w_est);
+  matlab_send(0, pos, pos_est, vel, vel_est, ang, ang_est, w, w_est);
   // matlab_send(ref[0], pos, pos_est, vel, vel_est, ang, ang_est, w, w_est);
-  matlab_send(ref, pos, pos_est, vel, vel_est, ang, ang_est, w, w_est);
+  // matlab_send(ref, pos, pos_est, vel, vel_est, ang, ang_est, w, w_est);
 
   endTime = micros();
 
-  delay(20 - (endTime - startTime) / 1000.0);
+  float del = 20 - (endTime - startTime) / 1000.0;
+  // Serial.println(del);
+  if (del > 0) {
+    delay(del);
+  }
 }
 
 float obs(int t1) {
